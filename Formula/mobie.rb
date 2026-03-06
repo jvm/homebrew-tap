@@ -9,7 +9,7 @@ class Mobie < Formula
   depends_on "rust"
 
   def install
-    system "cargo", "install", "--locked", "--root", prefix, "--path", "."
+    system "cargo", "install", "--locked", "--root", prefix, "--path", "apps/mobie"
   end
 
   test do
