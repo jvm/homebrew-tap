@@ -1,18 +1,22 @@
 class Mobie < Formula
   desc "Standalone CLI for querying the MOBIE API"
   homepage "https://github.com/jvm/mobie-cli"
-  url "https://github.com/jvm/mobie-cli/archive/refs/tags/v0.1.2.tar.gz"
-  sha256 "e30db82f0182cac88eb1c75d998c745cd89188ab327d62d4b5d1ed9ef0a82122"
   license "ISC"
-  head "https://github.com/jvm/mobie-cli.git", branch: "main"
+  version "0.1.3"
 
-  depends_on "rust"
+  if Hardware::CPU.arm?
+    url "https://github.com/jvm/mobie-cli/releases/download/v0.1.3/mobie-v0.1.3-aarch64-apple-darwin.tar.gz"
+    sha256 "3a19a0a32199e18035ce2bcd74fbcab29653bb946b5bd039917fcc641b331f6e"
+  else
+    url "https://github.com/jvm/mobie-cli/releases/download/v0.1.3/mobie-v0.1.3-x86_64-apple-darwin.tar.gz"
+    sha256 "cecba00e74303e0b88dc9c8ef1224689aaa84fea311bbdb0f045388051138f4a"
+  end
 
   def install
-    system "cargo", "install", "--locked", "--root", prefix, "--path", "apps/mobie"
+    bin.install "mobie"
   end
 
   test do
-    system "#{bin}/mobie", "--help"
+    assert_match "mobie", shell_output("#{bin}/mobie --help")
   end
 end
