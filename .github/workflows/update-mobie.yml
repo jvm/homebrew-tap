@@ -1,0 +1,46 @@
+name: update-mobie
+
+on:
+  repository_dispatch:
+    types:
+      - mobie_release
+
+permissions:
+  contents: write
+
+jobs:
+  update-formula:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Render formula
+        env:
+          VERSION: ${{ github.event.client_payload.version }}
+          ARM_URL: ${{ github.event.client_payload.macos_arm64.url }}
+          ARM_SHA: ${{ github.event.client_payload.macos_arm64.sha256 }}
+          INTEL_URL: ${{ github.event.client_payload.macos_amd64.url }}
+          INTEL_SHA: ${{ github.event.client_payload.macos_amd64.sha256 }}
+        run: |
+          bash ./scripts/render-mobie-formula.sh \
+            "${VERSION}" \
+            "${ARM_URL}" \
+            "${ARM_SHA}" \
+            "${INTEL_URL}" \
+            "${INTEL_SHA}"
+
+      - name: Commit formula update
+        env:
+          VERSION: ${{ github.event.client_payload.version }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if git diff --quiet -- Formula/mobie.rb; then
+            echo "Formula/mobie.rb already up to date"
+            exit 0
+          fi
+
+          git add Formula/mobie.rb
+          git commit -m "Update mobie to v${VERSION}"
+          git push
