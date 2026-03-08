@@ -7,7 +7,6 @@ on:
 
 permissions:
   contents: write
-  pull-requests: write
 
 jobs:
   update-formula:
@@ -45,34 +44,6 @@ jobs:
           git add Formula/mobie.rb
           git commit -m "Update mobie to v${VERSION}"
 
-      - name: Open pull request
-        env:
-          GH_TOKEN: ${{ secrets.HOMEBREW_TAP_PR_TOKEN }}
-          DEFAULT_GH_TOKEN: ${{ github.token }}
-          VERSION: ${{ github.event.client_payload.version }}
+      - name: Push formula update
         run: |
-          branch="update-mobie-v${VERSION}"
-          using_default_token=0
-
-          if [[ -z "${GH_TOKEN}" ]]; then
-            GH_TOKEN="${DEFAULT_GH_TOKEN}"
-            using_default_token=1
-          fi
-
-          git switch -c "${branch}"
-          git push --force-with-lease origin "${branch}"
-
-          if gh pr view "${branch}" --json number >/dev/null 2>&1; then
-            gh pr edit "${branch}" \
-              --title "Update mobie to v${VERSION}" \
-              --body "Automated formula update for mobie v${VERSION}."
-          else
-            if [[ "${using_default_token}" -eq 1 ]]; then
-              echo "warning: using default github.token; if PR creation is disabled for GitHub Actions, set HOMEBREW_TAP_PR_TOKEN to a PAT with repo scope" >&2
-            fi
-            gh pr create \
-              --head "${branch}" \
-              --base main \
-              --title "Update mobie to v${VERSION}" \
-              --body "Automated formula update for mobie v${VERSION}."
-          fi
+          git push origin HEAD:main
