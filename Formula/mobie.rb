@@ -2,14 +2,14 @@ class Mobie < Formula
   desc "Standalone CLI for querying the MOBIE API"
   homepage "https://github.com/jvm/mobie-cli"
   license "ISC"
-  version "0.3.0"
+  version "0.3.1"
 
   if Hardware::CPU.arm?
-    url "https://github.com/jvm/mobie-cli/releases/download/v0.3.0/mobie-v0.3.0-aarch64-apple-darwin.tar.gz"
-    sha256 "d0e8331a6293af267161d0b01ddca893da408621520afe8ca5e2dc1543eb31a5"
+    url "https://github.com/jvm/mobie-cli/releases/download/v0.3.1/mobie-v0.3.1-aarch64-apple-darwin.tar.gz"
+    sha256 "c5b1e4e2bedcf266812ce6d2213907252d44989e621b40b6ecc4457d8477c6d8"
   else
-    url "https://github.com/jvm/mobie-cli/releases/download/v0.3.0/mobie-v0.3.0-x86_64-apple-darwin.tar.gz"
-    sha256 "c81878d1127c962d68661d677035c9255c9f8398237063db1d4837999b7a7b9f"
+    url "https://github.com/jvm/mobie-cli/releases/download/v0.3.1/mobie-v0.3.1-x86_64-apple-darwin.tar.gz"
+    sha256 "7f19265168f4cd16a35814404011a408ae33f1f0d9c14e95b7ee71c7e526661d"
   end
 
   def install
