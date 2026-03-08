@@ -37,7 +37,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          if git diff --quiet -- Formula/mobie.rb; then
+          if [[ -z "$(git status --porcelain -- Formula/mobie.rb)" ]]; then
             echo "Formula/mobie.rb already up to date"
             exit 0
           fi
@@ -47,10 +47,17 @@ jobs:
 
       - name: Open pull request
         env:
-          GH_TOKEN: ${{ github.token }}
+          GH_TOKEN: ${{ secrets.HOMEBREW_TAP_PR_TOKEN }}
+          DEFAULT_GH_TOKEN: ${{ github.token }}
           VERSION: ${{ github.event.client_payload.version }}
         run: |
           branch="update-mobie-v${VERSION}"
+          using_default_token=0
+
+          if [[ -z "${GH_TOKEN}" ]]; then
+            GH_TOKEN="${DEFAULT_GH_TOKEN}"
+            using_default_token=1
+          fi
 
           git switch -c "${branch}"
           git push --force-with-lease origin "${branch}"
@@ -60,6 +67,9 @@ jobs:
               --title "Update mobie to v${VERSION}" \
               --body "Automated formula update for mobie v${VERSION}."
           else
+            if [[ "${using_default_token}" -eq 1 ]]; then
+              echo "warning: using default github.token; if PR creation is disabled for GitHub Actions, set HOMEBREW_TAP_PR_TOKEN to a PAT with repo scope" >&2
+            fi
             gh pr create \
               --head "${branch}" \
               --base main \
