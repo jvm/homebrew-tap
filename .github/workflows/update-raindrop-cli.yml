@@ -1,0 +1,67 @@
+name: update-raindrop-cli
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "raindrop-cli version to install, without leading v. Empty = latest from npm."
+        required: false
+        type: string
+  schedule:
+    - cron: "17 * * * *"
+
+permissions:
+  contents: write
+
+jobs:
+  update-formula:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Resolve npm package metadata
+        id: npm
+        env:
+          INPUT_VERSION: ${{ github.event.inputs.version }}
+        run: |
+          set -euo pipefail
+          package='@mocito/raindrop-cli'
+          version="${INPUT_VERSION:-}"
+          if [[ -z "${version}" ]]; then
+            version="$(npm view "${package}" version)"
+          fi
+          tarball_url="$(npm view "${package}@${version}" dist.tarball)"
+          curl -fsSL "${tarball_url}" -o package.tgz
+          sha256="$(shasum -a 256 package.tgz | awk '{print $1}')"
+
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          echo "tarball_url=${tarball_url}" >> "$GITHUB_OUTPUT"
+          echo "sha256=${sha256}" >> "$GITHUB_OUTPUT"
+
+      - name: Render formula
+        run: |
+          bash ./scripts/render-raindrop-cli-formula.sh \
+            "${{ steps.npm.outputs.version }}" \
+            "${{ steps.npm.outputs.tarball_url }}" \
+            "${{ steps.npm.outputs.sha256 }}"
+
+      - name: Commit formula update
+        env:
+          VERSION: ${{ steps.npm.outputs.version }}
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if git diff --quiet -- Formula/raindrop-cli.rb; then
+            echo "Formula/raindrop-cli.rb already up to date"
+            exit 0
+          fi
+
+          git add Formula/raindrop-cli.rb
+          git commit -m "Update raindrop-cli to v${VERSION}"
+          git push
