@@ -1,8 +1,8 @@
 class RaindropCli < Formula
   desc "Agent-friendly CLI for Raindrop.io"
   homepage "https://github.com/jvm/raindrop-cli"
-  url "https://registry.npmjs.org/@mocito/raindrop-cli/-/raindrop-cli-0.2.0.tgz"
-  sha256 "04f9a1ee07d36da81f19cc5b60964560321479af2d473e0fa4c987a32fd4d9bd"
+  url "https://registry.npmjs.org/@mocito/raindrop-cli/-/raindrop-cli-0.2.3.tgz"
+  sha256 "f463e50c52fde8cd34f950a3e6122c7ca851af89b62aee8080ec4eee5e6683e9"
   license "MIT"
 
   depends_on "node@20"
